@@ -10,6 +10,9 @@
 #include <defines.h>
 #include <debug_draw.h>
 
+const float SQUARED_RADIUS = 25.0f;
+const float TIME_TO_TARGET = 0.5f;
+
 void Body::init(const Color color, const Type type) {
   type_ = type;
   color_ = color;
@@ -34,6 +37,9 @@ void Body::update(const uint32_t dt) {
       break;
     case Body::SteeringMode::Kinematic_Flee: 
       this->kinematicFlee(state_, target_->getKinematic(), &steering);
+      break;
+    case Body::SteeringMode::Kinematic_Arrive: 
+      this->kinematicArrive(state_, target_->getKinematic(), &steering);
       break;
     }
     this->applySteering(steering, dt);
@@ -111,5 +117,19 @@ void Body::kinematicSeek(const KinematicStatus& character, const KinematicStatus
 
 void Body::kinematicFlee(const KinematicStatus& character, const KinematicStatus* target, KinematicSteering* steering) const{
   steering->velocity = (character.position - target->position).normalized() * this->max_speed_;
+  steering->rotation = 0.0f;
+}
+
+void Body::kinematicArrive(const KinematicStatus& character, const KinematicStatus* target, KinematicSteering* steering) const{
+  steering->velocity = target->position - character.position;
+  if (steering->velocity.length2() < SQUARED_RADIUS) {
+    steering->velocity = MathLib::Vec2(0.0f, 0.0f);
+  }
+  else {
+    steering->velocity /= TIME_TO_TARGET;
+    if (steering->velocity.length() > max_speed_) {
+      steering->velocity = steering->velocity.normalized() * max_speed_;
+    }
+  }
   steering->rotation = 0.0f;
 }
