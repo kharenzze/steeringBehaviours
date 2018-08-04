@@ -8,6 +8,7 @@ void AgentGroup::init(World* world, const Body::Color color, const Body::Type ty
   world_ = world;
   for (int i = 0; i < N_AGENTS; i++) {
     agents_[i].init(world, color, type);
+    agents_[i].setAgentGroup(this);
     const float x = randomFloat(-10.0f, 10.0f);
     const float y = randomFloat(-10.0f, 10.0f);
     agents_[i].getKinematic()->position = Vec2(WINDOW_WIDTH / 2 + x, WINDOW_HEIGHT / 2 + y);

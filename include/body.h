@@ -13,6 +13,7 @@
 #include <mathlib/vec2.h>
 
 class Agent;
+class AgentGroup;
 
 class Body {
   public:
@@ -56,6 +57,7 @@ class Body {
     void render() const;
 
     void setTarget(Agent* target);
+    void setAgentGroup(AgentGroup* ag) { agentGroup_ = ag; };
     void setSteering(const SteeringMode mode) { steering_mode_ = mode; };
     const KinematicStatus* getKinematic() const { return &state_; }
     KinematicStatus* getKinematic() { return &state_; }
@@ -88,6 +90,7 @@ class Body {
     Color color_;
     SteeringMode steering_mode_;
     Agent* target_;
+    AgentGroup * agentGroup_;
 
     const float max_speed_ = 100.0f;
 

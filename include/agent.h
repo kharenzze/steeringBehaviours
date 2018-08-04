@@ -14,6 +14,7 @@
 #include <cstdint>
 
 class World;
+class AgentGroup;
 
 class Agent {
   public:
@@ -26,6 +27,7 @@ class Agent {
     void shutdown();
 
     void setSteering(Body::SteeringMode steering) { body_.setSteering(steering); }   
+    void setAgentGroup(AgentGroup* ag) { body_.setAgentGroup(ag); }
     const KinematicStatus* getKinematic() const { return body_.getKinematic(); }
     KinematicStatus* getKinematic() { return body_.getKinematic(); }
   private:
