@@ -172,6 +172,22 @@ void Game::handleInput() {
           world_.ia()->setSteering(Body::SteeringMode::Wander);
           printf("Behavior Of Agent Changed To Wander\n");
           break;
+        case SDLK_z:
+          world_.ia()->setSteering(Body::SteeringMode::Separation);
+          printf("Behavior Of Agent Changed To Separation\n");
+          break;
+        case SDLK_x:
+          world_.ia()->setSteering(Body::SteeringMode::Cohesion);
+          printf("Behavior Of Agent Changed To Cohesion\n");
+          break;
+        case SDLK_c:
+          world_.ia()->setSteering(Body::SteeringMode::Alignment);
+          printf("Behavior Of Agent Changed To Alignment\n");
+          break;
+        case SDLK_v:
+          world_.ia()->setSteering(Body::SteeringMode::Flocking);
+          printf("Behavior Of Agent Changed To Flocking\n");
+          break;
       }
     }
   }

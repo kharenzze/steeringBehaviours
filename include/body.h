@@ -42,6 +42,10 @@ class Body {
       Face,                   //s
       LookGoing,              //d
       Wander,                 //f
+      Separation,             //z
+      Cohesion,               //x
+      Alignment,              //c
+      Flocking,               //v
     };
 
     Body() {};
