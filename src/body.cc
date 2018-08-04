@@ -59,6 +59,9 @@ void Body::update(const uint32_t dt) {
     case Body::SteeringMode::Arrive: 
       this->arrive(state_, target_->getKinematic(), &steering);
       break;
+    case Body::SteeringMode::Align: 
+      this->align(state_, target_->getKinematic(), &steering);
+      break;
     }
     if (isKinematic) {
       this->applyKinematicSteering(kinematicSteering, dt);
@@ -199,7 +202,6 @@ void Body::flee(const KinematicStatus& character, const KinematicStatus* target,
   steering->angular = 0.0f;
 }
 
-
 void Body::arrive(const KinematicStatus& character, const KinematicStatus* target, Steering* steering) const {
   constexpr float _maxAcceleration = 100.0f;
   constexpr float _slowRadius = 150.0f;
@@ -218,4 +220,26 @@ void Body::arrive(const KinematicStatus& character, const KinematicStatus* targe
     steering->linear = steering->linear.normalized() * _maxAcceleration;
   }
   steering->angular = 0;
+}
+
+void Body::align(const KinematicStatus& character, const KinematicStatus* target, Steering* steering) const {
+  const float _maxAngAcc = 2.0f;
+  const float _maxRotation = 2.0f;
+  const float _slowRadius = 0.5f;
+  const float _timeToTarget = 0.05f;
+
+  const float rotation = wrapAnglePI(target->orientation - character.orientation);
+  const float rotationSize = abs(rotation);
+
+  float targetRotation = _maxRotation;
+  if (rotationSize < _slowRadius) {
+    targetRotation = (_maxRotation * rotationSize) / _slowRadius;
+  }
+
+  targetRotation *= sign(rotation);
+  steering->angular = (targetRotation - character.rotation) / _timeToTarget;
+  if (abs(steering->angular) > _maxAngAcc) {
+    steering->angular= sign(steering->angular) * _maxAngAcc;
+  }
+  steering->linear = MathLib::Vec2(0, 0);
 }
