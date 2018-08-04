@@ -202,19 +202,19 @@ void Body::flee(const KinematicStatus& character, const KinematicStatus* target,
 
 void Body::arrive(const KinematicStatus& character, const KinematicStatus* target, Steering* steering) const {
   constexpr float _maxAcceleration = 100.0f;
-  constexpr float _slowRadius = 100.0f;
-  constexpr float _timeToTarget = 1.0f;
+  constexpr float _slowRadius = 150.0f;
+  constexpr float _timeToTarget = 0.5f;
   
-  MathLib::Vec2 dir = target->position - character.position;
-  float distance = dir.length();
+  const MathLib::Vec2 dir = target->position - character.position;
+  const float distance = dir.length();
   float targetSpeed = max_speed_;
   if (distance < _slowRadius) {
     targetSpeed *= distance / _slowRadius;
   }
 
   const MathLib::Vec2 targetVelocity = dir.normalized() * targetSpeed;
-  steering->linear = (targetVelocity - target->velocity) / _timeToTarget;
-  if (steering->linear.length() > _maxAcceleration) {
+  steering->linear = (targetVelocity - character.velocity) / _timeToTarget;
+  if (steering->linear.length() > _maxAcceleration) { 
     steering->linear = steering->linear.normalized() * _maxAcceleration;
   }
   steering->angular = 0;
