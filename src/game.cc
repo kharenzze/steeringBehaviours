@@ -85,7 +85,9 @@ void Game::handleInput() {
 
     if (e.type == SDL_KEYDOWN) {
       switch (e.key.keysym.sym) {
-        case SDLK_ESCAPE: quit_ = true; break;
+        case SDLK_ESCAPE: 
+			quit_ = true; 
+			break;
         case SDLK_F3:
           slo_mo_ = clamp<int8_t>(++slo_mo_, 1, 10);
           printf("Slow Motion Set To %d\n", slo_mo_);
