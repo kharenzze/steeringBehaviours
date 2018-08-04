@@ -65,6 +65,9 @@ void Body::update(const uint32_t dt) {
     case Body::SteeringMode::Velocity_Matching: 
       this->velocityMatching(state_, target_->getKinematic(), &steering);
       break;
+    case Body::SteeringMode::Pursue: 
+      this->pursue(state_, target_->getKinematic(), &steering);
+      break;
     }
     if (isKinematic) {
       this->applyKinematicSteering(kinematicSteering, dt);
@@ -255,4 +258,20 @@ void Body::velocityMatching(const KinematicStatus& character, const KinematicSta
     steering->linear = steering->linear.normalized() * _maxAcc;
   }
   steering->angular = 0;
+}
+
+void Body::pursue(const KinematicStatus& character, const KinematicStatus* target, Steering* steering) const {
+  const float _maxPrediction = 2.0f;
+
+  const float distance = (target->position - character.position).length();
+  float speed = character.velocity.length();
+
+  float prediction = _maxPrediction;
+  if (speed > (distance / _maxPrediction)) {
+    prediction = distance / speed;
+  }
+
+  KinematicStatus _newTarget = *target;
+  _newTarget.position += target->velocity * prediction;
+  this->seek(character, &_newTarget, steering);
 }
