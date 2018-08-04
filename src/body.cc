@@ -62,6 +62,9 @@ void Body::update(const uint32_t dt) {
     case Body::SteeringMode::Align: 
       this->align(state_, target_->getKinematic(), &steering);
       break;
+    case Body::SteeringMode::Velocity_Matching: 
+      this->velocityMatching(state_, target_->getKinematic(), &steering);
+      break;
     }
     if (isKinematic) {
       this->applyKinematicSteering(kinematicSteering, dt);
@@ -242,4 +245,14 @@ void Body::align(const KinematicStatus& character, const KinematicStatus* target
     steering->angular= sign(steering->angular) * _maxAngAcc;
   }
   steering->linear = MathLib::Vec2(0, 0);
+}
+
+void Body::velocityMatching(const KinematicStatus& character, const KinematicStatus* target, Steering* steering) const {
+  const float _maxAcc = 50.0f;
+  const float _timeToTarget = 0.5f;
+  steering->linear = (target->velocity - character.velocity) / _timeToTarget;
+  if (steering->linear.length() > _maxAcc) {
+    steering->linear = steering->linear.normalized() * _maxAcc;
+  }
+  steering->angular = 0;
 }
