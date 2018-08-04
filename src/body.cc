@@ -32,6 +32,9 @@ void Body::update(const uint32_t dt) {
     case Body::SteeringMode::Kinematic_Seek: 
       this->kinematicSeek(state_, target_->getKinematic(), &steering);
       break;
+    case Body::SteeringMode::Kinematic_Flee: 
+      this->kinematicFlee(state_, target_->getKinematic(), &steering);
+      break;
     }
     this->applySteering(steering, dt);
   } else {
@@ -103,5 +106,10 @@ void Body::keepInSpeed() {
 
 void Body::kinematicSeek(const KinematicStatus& character, const KinematicStatus* target, KinematicSteering* steering) const{
   steering->velocity = (target->position - character.position).normalized() * this->max_speed_;
+  steering->rotation = 0.0f;
+}
+
+void Body::kinematicFlee(const KinematicStatus& character, const KinematicStatus* target, KinematicSteering* steering) const{
+  steering->velocity = (character.position - target->position).normalized() * this->max_speed_;
   steering->rotation = 0.0f;
 }
