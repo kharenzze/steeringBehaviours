@@ -66,6 +66,7 @@ class Body {
     void kinematicSeek(const KinematicStatus& character, const KinematicStatus* target, KinematicSteering* steering) const;
     void kinematicFlee(const KinematicStatus& character, const KinematicStatus* target, KinematicSteering* steering) const;
     void kinematicArrive(const KinematicStatus& character, const KinematicStatus* target, KinematicSteering* steering) const;
+    void kinematicWandering(const KinematicStatus& character, const KinematicStatus* target, KinematicSteering* steering) const;
 
     Sprite sprite_;
     Type type_;

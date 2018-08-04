@@ -41,6 +41,9 @@ void Body::update(const uint32_t dt) {
     case Body::SteeringMode::Kinematic_Arrive: 
       this->kinematicArrive(state_, target_->getKinematic(), &steering);
       break;
+    case Body::SteeringMode::Kinematic_Wander: 
+      this->kinematicWandering(state_, target_->getKinematic(), &steering);
+      break;
     }
     this->applySteering(steering, dt);
   } else {
@@ -60,6 +63,9 @@ void Body::applySteering(const KinematicSteering& steering, const uint32_t ms) {
   state_.speed = state_.velocity.length();
   state_.position += state_.velocity * dt;
   state_.orientation = state_.orientation + steering.rotation * dt;
+
+  keepInBounds();
+  keepInBounds();
 }
 
 void Body::render() const {
@@ -132,4 +138,14 @@ void Body::kinematicArrive(const KinematicStatus& character, const KinematicStat
     }
   }
   steering->rotation = 0.0f;
+}
+
+void Body::kinematicWandering(const KinematicStatus& character, const KinematicStatus* target, KinematicSteering* steering) const{
+  const auto _maxSpeed = max_speed_ / 2;
+  const float _maxRotation = 3.14f;
+
+  MathLib::Vec2 orientation;
+  orientation.fromPolar(1.0f, character.orientation);
+  steering->velocity = orientation * _maxSpeed;
+  steering->rotation = _maxRotation * (randomFloat(0.0f, 1.0f) - randomFloat(0.0f, 1.0f));
 }
