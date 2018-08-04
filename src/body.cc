@@ -71,6 +71,9 @@ void Body::update(const uint32_t dt) {
     case Body::SteeringMode::Face: 
       this->face(state_, target_->getKinematic(), &steering);
       break;
+    case Body::SteeringMode::LookGoing: 
+      this->lookGoing(state_, target_->getKinematic(), &steering);
+      break;
     }
     if (isKinematic) {
       this->applyKinematicSteering(kinematicSteering, dt);
@@ -284,5 +287,16 @@ void Body::face(const KinematicStatus& character, const KinematicStatus* target,
 
   KinematicStatus _newTarget = *target;
   _newTarget.orientation = atan2(dir.y(), dir.x());
+  this->align(character, &_newTarget, steering);
+}
+
+void Body::lookGoing(const KinematicStatus& character, const KinematicStatus* target, Steering* steering) const {
+  if (character.velocity.length() == 0) {
+    steering->angular = 0;
+    return;
+  }
+
+  KinematicStatus _newTarget = *target;
+  _newTarget.orientation = atan2(character.velocity.y(), character.velocity.x());
   this->align(character, &_newTarget, steering);
 }
