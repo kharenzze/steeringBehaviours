@@ -34,7 +34,7 @@ local function new_project(name)
       targetsuffix ("_r")
     configuration {"windows"}
       flags {"NoEditAndContinue"}
-      windowstargetplatformversion "10.0.16299.0"
+      windowstargetplatformversion "10.0.17134.0"
 end
 
 solution "05MVID"
