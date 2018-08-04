@@ -46,6 +46,11 @@ struct KinematicSteering {
   float rotation = 0.0f;
 };
 
+struct Steering {
+  MathLib::Vec2 linear{ 0.0f, 0.0f };
+  float angular = 0.0f;
+};
+
 template <typename T>
 inline T clamp(const T& n, const T& lower, const T& upper) {
   return std::max(lower, std::min(n, upper));

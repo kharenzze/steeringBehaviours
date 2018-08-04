@@ -61,12 +61,15 @@ class Body {
     void keepInSpeed();
     void keepInBounds();
 
-    void applySteering(const KinematicSteering& steering, const uint32_t ms);
-
+    void applyKinematicSteering(const KinematicSteering& steering, const uint32_t ms);
+    void applySteering(const Steering& steering, const uint32_t ms);
+    
     void kinematicSeek(const KinematicStatus& character, const KinematicStatus* target, KinematicSteering* steering) const;
     void kinematicFlee(const KinematicStatus& character, const KinematicStatus* target, KinematicSteering* steering) const;
     void kinematicArrive(const KinematicStatus& character, const KinematicStatus* target, KinematicSteering* steering) const;
     void kinematicWandering(const KinematicStatus& character, const KinematicStatus* target, KinematicSteering* steering) const;
+
+    void seek(const KinematicStatus& character, const KinematicStatus* target, Steering* steering) const;
 
     Sprite sprite_;
     Type type_;

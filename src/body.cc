@@ -29,23 +29,36 @@ void Body::init(const Color color, const Type type) {
 }
 
 void Body::update(const uint32_t dt) {
-  KinematicSteering steering;
+  KinematicSteering kinematicSteering;
+  Steering steering;
+  bool isKinematic = false;
   if (type_ == Type::Autonomous) {
     switch (this->steering_mode_) {
     case Body::SteeringMode::Kinematic_Seek: 
-      this->kinematicSeek(state_, target_->getKinematic(), &steering);
+      this->kinematicSeek(state_, target_->getKinematic(), &kinematicSteering);
+      isKinematic = true;
       break;
     case Body::SteeringMode::Kinematic_Flee: 
-      this->kinematicFlee(state_, target_->getKinematic(), &steering);
+      this->kinematicFlee(state_, target_->getKinematic(), &kinematicSteering);
+      isKinematic = true;
       break;
     case Body::SteeringMode::Kinematic_Arrive: 
-      this->kinematicArrive(state_, target_->getKinematic(), &steering);
+      this->kinematicArrive(state_, target_->getKinematic(), &kinematicSteering);
+      isKinematic = true;
       break;
     case Body::SteeringMode::Kinematic_Wander: 
-      this->kinematicWandering(state_, target_->getKinematic(), &steering);
+      this->kinematicWandering(state_, target_->getKinematic(), &kinematicSteering);
+      isKinematic = true;
+      break;
+    case Body::SteeringMode::Seek: 
+      this->seek(state_, target_->getKinematic(), &steering);
       break;
     }
-    this->applySteering(steering, dt);
+    if (isKinematic) {
+      this->applyKinematicSteering(kinematicSteering, dt);
+    } else {
+      this->applySteering(steering, dt);
+    }
   } else {
     updateManual(dt);
   }
@@ -57,15 +70,27 @@ void Body::update(const uint32_t dt) {
 
 }
 
-void Body::applySteering(const KinematicSteering& steering, const uint32_t ms) {
+void Body::applyKinematicSteering(const KinematicSteering& steering, const uint32_t ms) {
   const float dt = ms * 0.001;
   state_.velocity = steering.velocity;
   state_.speed = state_.velocity.length();
   state_.position += state_.velocity * dt;
   state_.orientation = state_.orientation + steering.rotation * dt;
 
+  keepInSpeed();
   keepInBounds();
+}
+
+void Body::applySteering(const Steering& steering, const uint32_t ms) {
+  const float dt = ms * 0.001;
+  state_.velocity += steering.linear * dt;
+  state_.speed = state_.velocity.length();
+  keepInSpeed();
+  state_.position += state_.velocity * dt;
   keepInBounds();
+
+  state_.rotation += steering.angular * dt;
+  state_.orientation += state_.rotation * dt;
 }
 
 void Body::render() const {
@@ -148,4 +173,10 @@ void Body::kinematicWandering(const KinematicStatus& character, const KinematicS
   orientation.fromPolar(1.0f, character.orientation);
   steering->velocity = orientation * _maxSpeed;
   steering->rotation = _maxRotation * (randomFloat(0.0f, 1.0f) - randomFloat(0.0f, 1.0f));
+}
+
+void Body::seek(const KinematicStatus& character, const KinematicStatus* target, Steering* steering) const {
+  constexpr float _maxAcceleration = 5.0f;
+  steering->linear = (target->position - character.position) * _maxAcceleration;
+  steering->angular = 0.0f;
 }
