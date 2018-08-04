@@ -56,6 +56,9 @@ void Body::update(const uint32_t dt) {
     case Body::SteeringMode::Flee: 
       this->flee(state_, target_->getKinematic(), &steering);
       break;
+    case Body::SteeringMode::Arrive: 
+      this->arrive(state_, target_->getKinematic(), &steering);
+      break;
     }
     if (isKinematic) {
       this->applyKinematicSteering(kinematicSteering, dt);
@@ -82,6 +85,9 @@ void Body::applyKinematicSteering(const KinematicSteering& steering, const uint3
 
   keepInSpeed();
   keepInBounds();
+
+  dd.green.pos = state_.position;
+  dd.green.v = state_.velocity;
 }
 
 void Body::applySteering(const Steering& steering, const uint32_t ms) {
@@ -94,6 +100,9 @@ void Body::applySteering(const Steering& steering, const uint32_t ms) {
 
   state_.rotation += steering.angular * dt;
   state_.orientation += state_.rotation * dt;
+
+  dd.green.pos = state_.position;
+  dd.green.v = state_.velocity;
 }
 
 void Body::render() const {
@@ -179,13 +188,34 @@ void Body::kinematicWandering(const KinematicStatus& character, const KinematicS
 }
 
 void Body::seek(const KinematicStatus& character, const KinematicStatus* target, Steering* steering) const {
-  constexpr float _maxAcceleration = 5.0f;
-  steering->linear = (target->position - character.position) * _maxAcceleration;
+  constexpr float _maxAcceleration = 100.0f;
+  steering->linear = (target->position - character.position).normalized() * _maxAcceleration;
   steering->angular = 0.0f;
 }
 
 void Body::flee(const KinematicStatus& character, const KinematicStatus* target, Steering* steering) const {
-  constexpr float _maxAcceleration = 5.0f;
-  steering->linear = (character.position - target->position) * _maxAcceleration;
+  constexpr float _maxAcceleration = 100.0f;
+  steering->linear = (character.position - target->position).normalized() * _maxAcceleration;
   steering->angular = 0.0f;
+}
+
+
+void Body::arrive(const KinematicStatus& character, const KinematicStatus* target, Steering* steering) const {
+  constexpr float _maxAcceleration = 100.0f;
+  constexpr float _slowRadius = 100.0f;
+  constexpr float _timeToTarget = 1.0f;
+  
+  MathLib::Vec2 dir = target->position - character.position;
+  float distance = dir.length();
+  float targetSpeed = max_speed_;
+  if (distance < _slowRadius) {
+    targetSpeed *= distance / _slowRadius;
+  }
+
+  const MathLib::Vec2 targetVelocity = dir.normalized() * targetSpeed;
+  steering->linear = (targetVelocity - target->velocity) / _timeToTarget;
+  if (steering->linear.length() > _maxAcceleration) {
+    steering->linear = steering->linear.normalized() * _maxAcceleration;
+  }
+  steering->angular = 0;
 }
