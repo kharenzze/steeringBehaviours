@@ -74,6 +74,9 @@ void Body::update(const uint32_t dt) {
     case Body::SteeringMode::LookGoing: 
       this->lookGoing(state_, target_->getKinematic(), &steering);
       break;
+    case Body::SteeringMode::Wander: 
+      this->wander(state_, target_->getKinematic(), &steering);
+      break;
     }
     if (isKinematic) {
       this->applyKinematicSteering(kinematicSteering, dt);
@@ -299,4 +302,31 @@ void Body::lookGoing(const KinematicStatus& character, const KinematicStatus* ta
   KinematicStatus _newTarget = *target;
   _newTarget.orientation = atan2(character.velocity.y(), character.velocity.x());
   this->align(character, &_newTarget, steering);
+}
+
+
+void Body::wander(const KinematicStatus& character, const KinematicStatus* target, Steering* steering) const {
+  static float _wanderOffset = 50.0f;
+  static float _wanderRadius = 20.0f;
+  static float _wanderRate = 2.0f;
+  static float _wanderOrientation = 0;
+  static float _maxAcceleration = 100.0f;
+
+  KinematicStatus _newTarget;
+
+  _wanderOrientation += _wanderRate * (randomFloat(0, 1.0f) - randomFloat(0, 1.0f));
+  std::cout << _wanderOrientation << std::endl;
+
+  _newTarget.orientation = _wanderOrientation + character.orientation;
+  MathLib::Vec2 charOrientation;
+  charOrientation.fromPolar(1.0f, character.orientation);
+
+  MathLib::Vec2 targetOrientation;
+  targetOrientation.fromPolar(1.0f, _newTarget.orientation);
+  _newTarget.position = character.position + (charOrientation * _wanderOffset);
+  _newTarget.position += targetOrientation * _wanderRadius;
+  DebugDraw::drawCross(_newTarget.position, 0x00, 0x00, 0xFF, 0xFF);
+
+  this->face(character, &_newTarget, steering);
+  steering->linear = charOrientation * _maxAcceleration;
 }
