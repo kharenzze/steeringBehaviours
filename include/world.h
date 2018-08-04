@@ -13,6 +13,7 @@
 
 #include <cstdio>
 #include <agent.h>
+#include <AgentGroup.h>
 
 using MathLib::Vec2;
 
@@ -21,7 +22,6 @@ class World {
     World() {
       target_.init(this, Body::Color::Red, Body::Type::Manual);
       ia_.init(this, Body::Color::Green, Body::Type::Autonomous);
-      ia_.getKinematic()->position = Vec2(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
     };
     ~World() {
       target_.shutdown();
@@ -32,9 +32,10 @@ class World {
     void render() { target_.render(); ia_.render(); }
 
     Agent* target() { return &target_; }
-    Agent* ia() { return &ia_; }
+    AgentGroup* ia() { return &ia_; }
   private:
-    Agent target_, ia_;
+    Agent target_;
+    AgentGroup ia_;
 };
 
 #endif
