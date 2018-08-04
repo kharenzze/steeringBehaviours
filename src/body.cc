@@ -26,14 +26,31 @@ void Body::init(const Color color, const Type type) {
 }
 
 void Body::update(const uint32_t dt) {
+  KinematicSteering steering;
   if (type_ == Type::Autonomous) {
-                                                      //TODO
+    switch (this->steering_mode_) {
+    case Body::SteeringMode::Kinematic_Seek: 
+      this->kinematicSeek(state_, target_->getKinematic(), &steering);
+      break;
+    }
+    this->applySteering(steering, dt);
   } else {
     updateManual(dt);
   }
 
+
+
   sprite_.setPosition(state_.position.x(), state_.position.y());
   sprite_.setRotation(state_.orientation);
+
+}
+
+void Body::applySteering(const KinematicSteering& steering, const uint32_t ms) {
+  const float dt = ms * 0.001;
+  state_.velocity = steering.velocity;
+  state_.speed = state_.velocity.length();
+  state_.position += state_.velocity * dt;
+  state_.orientation = state_.orientation + steering.rotation * dt;
 }
 
 void Body::render() const {
@@ -82,4 +99,9 @@ void Body::keepInSpeed() {
   if (state_.velocity.length() > max_speed_) {
     state_.velocity = state_.velocity.normalized() * max_speed_;
   }
+}
+
+void Body::kinematicSeek(const KinematicStatus& character, const KinematicStatus* target, KinematicSteering* steering) const{
+  steering->velocity = (target->position - character.position).normalized() * this->max_speed_;
+  steering->rotation = 0.0f;
 }

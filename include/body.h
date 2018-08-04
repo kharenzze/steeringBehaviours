@@ -61,6 +61,10 @@ class Body {
     void keepInSpeed();
     void keepInBounds();
 
+    void applySteering(const KinematicSteering& steering, const uint32_t ms);
+
+    void kinematicSeek(const KinematicStatus& character, const KinematicStatus* target, KinematicSteering* steering) const;
+
     Sprite sprite_;
     Type type_;
     Color color_;

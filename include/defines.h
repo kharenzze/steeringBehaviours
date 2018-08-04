@@ -41,6 +41,11 @@ struct KinematicStatus {
   float speed{ 0.0f };
 };
 
+struct KinematicSteering {
+  MathLib::Vec2 velocity{ 0.0f, 0.0f };
+  float rotation = 0.0f;
+};
+
 template <typename T>
 inline T clamp(const T& n, const T& lower, const T& upper) {
   return std::max(lower, std::min(n, upper));
