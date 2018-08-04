@@ -68,6 +68,9 @@ void Body::update(const uint32_t dt) {
     case Body::SteeringMode::Pursue: 
       this->pursue(state_, target_->getKinematic(), &steering);
       break;
+    case Body::SteeringMode::Face: 
+      this->face(state_, target_->getKinematic(), &steering);
+      break;
     }
     if (isKinematic) {
       this->applyKinematicSteering(kinematicSteering, dt);
@@ -274,4 +277,12 @@ void Body::pursue(const KinematicStatus& character, const KinematicStatus* targe
   KinematicStatus _newTarget = *target;
   _newTarget.position += target->velocity * prediction;
   this->seek(character, &_newTarget, steering);
+}
+
+void Body::face(const KinematicStatus& character, const KinematicStatus* target, Steering* steering) const {
+  const MathLib::Vec2 dir = target->position - character.position;
+
+  KinematicStatus _newTarget = *target;
+  _newTarget.orientation = atan2(dir.y(), dir.x());
+  this->align(character, &_newTarget, steering);
 }

@@ -75,6 +75,7 @@ class Body {
     void align(const KinematicStatus& character, const KinematicStatus* target, Steering* steering) const;
     void velocityMatching(const KinematicStatus& character, const KinematicStatus* target, Steering* steering) const;
     void pursue(const KinematicStatus& character, const KinematicStatus* target, Steering* steering) const;
+    void face(const KinematicStatus& character, const KinematicStatus* target, Steering* steering) const;
 
     Sprite sprite_;
     Type type_;
