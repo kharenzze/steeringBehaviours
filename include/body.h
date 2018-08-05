@@ -87,6 +87,7 @@ class Body {
     void separation(const KinematicStatus& character, AgentGroup* agentGroup, Steering* steering) const;
     void cohesion(const KinematicStatus& character, AgentGroup* agentGroup, Steering* steering) const;
     void alignment(const KinematicStatus& character, AgentGroup* agentGroup, Steering* steering) const;
+    void flocking(const KinematicStatus& character, AgentGroup* agentGroup, const KinematicStatus* target, Steering* steering) const;
 
     Sprite sprite_;
     Type type_;

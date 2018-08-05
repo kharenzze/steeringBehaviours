@@ -87,6 +87,9 @@ void Body::update(const uint32_t dt) {
     case Body::SteeringMode::Alignment: 
       this->alignment(state_, agentGroup_, &steering);
       break;
+    case Body::SteeringMode::Flocking: 
+      this->flocking(state_, agentGroup_, target_->getKinematic(), &steering);
+      break;
     }
     if (isKinematic) {
       this->applyKinematicSteering(kinematicSteering, dt);
@@ -415,4 +418,16 @@ void Body::alignment(const KinematicStatus& character, AgentGroup* agentGroup, S
     st.orientation += character.orientation;
     this->align(character, &st, steering);
   }
+}
+
+void Body::flocking(const KinematicStatus& character, AgentGroup* agentGroup,const KinematicStatus * target ,Steering* steering) const {
+  Steering seek, align, cohesion, separation, face;
+  this->seek(character, target, &seek);
+  this->face(character, target, &face);
+  this->alignment(character, agentGroup, &align);
+  this->separation(character, agentGroup, &separation);
+  this->cohesion(character, agentGroup, &cohesion);
+
+  steering->linear = seek.linear * 0.6f + separation.linear * 0.3f + cohesion.linear * 0.1f;
+  steering->angular = face.angular * 0.7f + align.angular * 0.3f;
 }
