@@ -36,3 +36,7 @@ void AgentGroup::setSteering(Body::SteeringMode steering) {
     agents_[i].setSteering(steering);
   }
 }
+
+Agent* AgentGroup::getAgent(int i) {
+  return &agents_[i];
+}

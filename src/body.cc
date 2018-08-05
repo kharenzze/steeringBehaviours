@@ -7,6 +7,7 @@
 
 #include <body.h>
 #include <agent.h>
+#include <AgentGroup.h>
 #include <defines.h>
 #include <debug_draw.h>
 
@@ -76,6 +77,9 @@ void Body::update(const uint32_t dt) {
       break;
     case Body::SteeringMode::Wander: 
       this->wander(state_, target_->getKinematic(), &steering);
+      break;
+    case Body::SteeringMode::Separation: 
+      this->separation(state_, agentGroup_, &steering);
       break;
     }
     if (isKinematic) {
@@ -329,4 +333,29 @@ void Body::wander(const KinematicStatus& character, const KinematicStatus* targe
 
   this->face(character, &_newTarget, steering);
   steering->linear = charOrientation * _maxAcceleration;
+}
+
+void Body::separation(const KinematicStatus& character, AgentGroup* agentGroup, Steering* steering) const {
+  const float _radius = 100.0f;
+  const float _maxAcc = 100.0f;
+
+  steering->linear = MathLib::Vec2(0, 0);
+  for (int i = 0; i < N_AGENTS; i++) {
+    const auto obs = agentGroup->getAgent(i)->getKinematic();
+    const auto _dir = character.position - obs->position;
+    const float _dist = _dir.length();
+    if (_dist < _radius) {
+      if (_dist == 0) {
+        MathLib::Vec2 d;
+        d.fromPolar(_radius, randomFloat(0, 3.14f));
+        steering->linear += d;
+      } else {
+        steering->linear += _dir.normalized() * (_radius - _dist);
+      }
+    }
+  }
+
+  if (steering->linear.length() > _maxAcc) {
+    steering->linear = steering->linear.normalized() * _maxAcc;
+  }
 }

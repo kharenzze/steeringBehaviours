@@ -18,6 +18,7 @@ public:
   void render() const;
   void shutdown();
   void setSteering(Body::SteeringMode steering);
+  Agent* getAgent(int i);
 
 private:
   World * world_;
