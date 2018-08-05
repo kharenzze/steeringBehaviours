@@ -86,6 +86,7 @@ class Body {
     void wander(const KinematicStatus& character, const KinematicStatus* target, Steering* steering) const;
     void separation(const KinematicStatus& character, AgentGroup* agentGroup, Steering* steering) const;
     void cohesion(const KinematicStatus& character, AgentGroup* agentGroup, Steering* steering) const;
+    void alignment(const KinematicStatus& character, AgentGroup* agentGroup, Steering* steering) const;
 
     Sprite sprite_;
     Type type_;

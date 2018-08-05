@@ -84,6 +84,9 @@ void Body::update(const uint32_t dt) {
     case Body::SteeringMode::Cohesion: 
       this->cohesion(state_, agentGroup_, &steering);
       break;
+    case Body::SteeringMode::Alignment: 
+      this->alignment(state_, agentGroup_, &steering);
+      break;
     }
     if (isKinematic) {
       this->applyKinematicSteering(kinematicSteering, dt);
@@ -322,7 +325,6 @@ void Body::wander(const KinematicStatus& character, const KinematicStatus* targe
   KinematicStatus _newTarget;
 
   _wanderOrientation += _wanderRate * (randomFloat(0, 1.0f) - randomFloat(0, 1.0f));
-  std::cout << _wanderOrientation << std::endl;
 
   _newTarget.orientation = _wanderOrientation + character.orientation;
   MathLib::Vec2 charOrientation;
@@ -365,9 +367,10 @@ void Body::separation(const KinematicStatus& character, AgentGroup* agentGroup, 
 
 void Body::cohesion(const KinematicStatus& character, AgentGroup* agentGroup, Steering* steering) const {
   const float _radius = 100.0f;
-  const float _maxAcc = 100.0f;
 
-  steering->linear = MathLib::Vec2(0, 0);
+  KinematicStatus st;
+
+  st.position = MathLib::Vec2(0, 0);
   int total = 0;
   for (int i = 0; i < N_AGENTS; i++) {
     const auto obs = agentGroup->getAgent(i)->getKinematic();
@@ -375,16 +378,41 @@ void Body::cohesion(const KinematicStatus& character, AgentGroup* agentGroup, St
     const float _dist = _dir.length();
     if (_dist < _radius) {
       if (_dist != 0) {
-        steering->linear += _dir;
+        st.position += _dir;
         total += 1;
       }
     }
   }
 
-  if (total) 
-    steering->linear /= total;
+  if (total) {
+    st.position /= total;
+    st.position += character.position;
+    this->arrive(character, &st, steering);
+  }
+}
 
-  if (steering->linear.length() > _maxAcc) {
-    steering->linear = steering->linear.normalized() * _maxAcc;
+void Body::alignment(const KinematicStatus& character, AgentGroup* agentGroup, Steering* steering) const {
+  const float _radius = 100.0f;
+  const float _maxAng = 1.0f;
+
+  int total = 0;
+  KinematicStatus st;
+
+  for (int i = 0; i < N_AGENTS; i++) {
+    const auto obs = agentGroup->getAgent(i)->getKinematic();
+    const auto _dir = obs->position - character.position;
+    const float _dist = _dir.length();
+    if (_dist < _radius) {
+      auto _ang = wrapAnglePI(obs->orientation - character.orientation);
+      st.orientation += _ang;
+      total += 1;
+    }
+  }
+
+
+  if (total) {
+    st.orientation /= total;
+    st.orientation += character.orientation;
+    this->align(character, &st, steering);
   }
 }
